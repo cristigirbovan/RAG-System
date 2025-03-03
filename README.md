@@ -1,9 +1,9 @@
-# Enhanced RAG System Architecture Document
-
+# RAG System Architecture Document
+![Alt text for the image](./RAG_System_Deployment_Architecture.png)
 ## 1. Overview and Goals
 
 ### 1.1 System Purpose
-The Enhanced RAG (Retrieval Augmented Generation) System is designed to provide high-quality, contextually relevant responses to user queries by leveraging multiple information retrieval methods combined with large language models (LLMs). The system offers a production-grade, highly scalable solution for enterprise knowledge management and question-answering capabilities.
+The RAG (Retrieval Augmented Generation) System is designed to provide high-quality, contextually relevant responses to user queries by leveraging multiple information retrieval methods combined with large language models (LLMs). The system offers a production-grade, highly scalable solution for enterprise knowledge management and question-answering capabilities.
 
 ### 1.2 Key Goals
 - **Information Accuracy**: Ensure responses are grounded in factual information from trusted sources
