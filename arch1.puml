@@ -1,0 +1,188 @@
+@startuml Enhanced RAG System Architecture
+
+skinparam componentStyle rectangle
+skinparam component {
+  BackgroundColor RECTANGLE_COLOR
+  BorderColor black
+  ArrowColor black
+}
+
+skinparam database {
+  BackgroundColor DATABASE_COLOR
+  BorderColor black
+}
+
+skinparam rectangle {
+  BackgroundColor RECTANGLE_COLOR
+  BorderColor black
+  RoundCorner 10
+}
+
+skinparam cloud {
+  BackgroundColor EXTERNAL_COLOR
+  BorderColor black
+}
+
+' Top-level components
+package "Client Layer" as ClientLayer {
+  [Web Browser] as WebClient
+  [Mobile App] as MobileClient
+  [API Client] as ApiClient
+}
+
+package "Infrastructure" as Infra {
+  [Load Balancer] as LoadBalancer
+  [API Gateway] as ApiGateway
+
+  rectangle "Kubernetes Cluster" as K8s  {
+    package "External Services" as ExternalSvcs {
+      [OpenAI API] as OpenAI
+      [Document Storage] as DocStorage
+    }
+
+    package "API Layer" as ApiLayer {
+      [RagApiController] as RagController
+      [AdminController] as AdminController
+      [UiSupportController] as UIController
+      [SecurityFilters] as Security
+    }
+
+    package "Core RAG Engine" as CoreEngine {
+      [EnhancedRagService] as RagService
+      [RetrievalPipeline] as RetrievalPipeline
+      [RetrievalStrategyFactory] as StrategyFactory
+
+      rectangle "Retrieval Strategies" as Strategies {
+        [HybridStrategy] as HybridStrategy
+        [HydeStrategy] as HydeStrategy
+        [DecompositionStrategy] as DecompositionStrategy
+        [AdvancedStrategy] as AdvancedStrategy
+      }
+    }
+
+    package "Document Processing" as DocProcessing {
+      [DocumentProcessor] as DocProcessor
+      [MultiModalProcessor] as MultiModalProcessor
+      [EntityExtractor] as EntityExtractor
+    }
+
+    package "Evaluation System" as EvalSystem {
+      [EvaluationService] as EvalService
+      [EvaluationRepository] as EvalRepo
+    }
+
+    package "Storage Layer" as StorageLayer {
+      database "Vector DB (Weaviate)" as VectorDB  {
+        [EnhancedWeaviateVectorStore] as WeaviateStore
+        [VectorStoreFactory] as VectorFactory
+      }
+
+      database "Graph DB (Neo4j)" as GraphDB  {
+        [EnhancedNeo4jGraphRepository] as Neo4jRepo
+      }
+
+      database "Relational DB (PostgreSQL)" as RelationalDB {
+        [EvaluationStorage] as EvalStorage
+      }
+
+      database "Cache (Redis)" as CacheDB  {
+        [QueryCache] as QueryCache
+        [EntityCache] as EntityCache
+      }
+    }
+
+    package "Monitoring and Observability" as MonitoringLayer {
+      [MetricsService] as MetricsService
+      [Prometheus] as Prometheus
+      [Grafana] as Grafana
+      [Loki] as Loki
+      [Tempo] as Tempo
+      [OpenTelemetry Collector] as OtelCollector
+    }
+  }
+}
+
+' Relationships - Client Layer
+WebClient --> LoadBalancer
+MobileClient --> LoadBalancer
+ApiClient --> LoadBalancer
+LoadBalancer --> ApiGateway
+ApiGateway --> RagController
+ApiGateway --> AdminController
+ApiGateway --> UIController
+
+' Relationships - API Layer
+RagController --> Security
+AdminController --> Security
+UIController --> Security
+Security --> RagService
+Security --> EvalService
+
+' Relationships - Core Engine
+RagController --> RagService
+RagService --> RetrievalPipeline
+RagService --> OpenAI
+RagService --> DocProcessor
+RagService --> MultiModalProcessor
+RagService --> EvalService
+RetrievalPipeline --> StrategyFactory
+StrategyFactory -down-> HybridStrategy
+StrategyFactory -down-> HydeStrategy
+StrategyFactory -down-> DecompositionStrategy
+StrategyFactory -down-> AdvancedStrategy
+HybridStrategy -down-> VectorFactory
+HybridStrategy -down-> Neo4jRepo
+HydeStrategy -down-> VectorFactory
+HydeStrategy -down-> OpenAI
+DecompositionStrategy -down-> VectorFactory
+DecompositionStrategy -down-> OpenAI
+AdvancedStrategy -down-> VectorFactory
+AdvancedStrategy -down-> Neo4jRepo
+AdvancedStrategy -down-> OpenAI
+
+' Relationships - Document Processing
+DocProcessor --> EntityExtractor
+MultiModalProcessor --> DocProcessor
+MultiModalProcessor --> OpenAI
+DocProcessor --> DocStorage
+RagController -left-> DocProcessor : Document Ingestion
+
+' Relationships - Storage Layer
+VectorFactory -down-> WeaviateStore
+RetrievalPipeline --> WeaviateStore
+RetrievalPipeline --> Neo4jRepo
+DocProcessor --> WeaviateStore
+DocProcessor --> Neo4jRepo
+EntityExtractor -right-> Neo4jRepo : Entity Storage
+EvalRepo --> EvalStorage
+EntityExtractor -down-> EntityCache : Cache Entities
+RagService -down-> QueryCache : Cache Responses
+
+' Relationships - Evaluation System
+AdminController -right-> EvalService : Admin Operations
+EvalService -down-> EvalRepo
+RagService -right-> EvalService : Auto-evaluate
+
+' Relationships - Monitoring
+RagService -up-> MetricsService : Record Metrics
+DocProcessor -up-> MetricsService : Record Metrics
+RetrievalPipeline -up-> MetricsService : Record Metrics
+EvalService -up-> MetricsService : Record Metrics
+MetricsService -right-> Prometheus : Export Metrics
+Prometheus -right-> Grafana : Visualization
+OtelCollector -right-> Tempo : Tracing
+OtelCollector -right-> Loki : Logging
+OtelCollector -right-> Prometheus : Metrics
+
+' Data Flow Labels
+WebClient -down-> LoadBalancer : "User Queries"
+RagController -down-> RagService : "Process Query"
+RagService -down-> RetrievalPipeline : "Retrieve Context"
+RagService -right-> OpenAI : "Generate Response"
+RetrievalPipeline -down-> WeaviateStore : "Vector Similarity Search"
+RetrievalPipeline -down-> Neo4jRepo : "Knowledge Graph Query"
+DocProcessor -down-> WeaviateStore : "Store Embeddings"
+DocProcessor -right-> Neo4jRepo : "Update Knowledge Graph"
+EntityExtractor -right-> OpenAI : "Extract Entities"
+
+@enduml

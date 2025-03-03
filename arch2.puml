@@ -1,0 +1,277 @@
+@startuml Document Ingestion Flow
+
+!theme plain
+title Document Ingestion Flow
+
+participant "API Layer" as API
+participant "Document Processor" as DocProcessor
+participant "MultiModal Processor" as MultiModal
+participant "Entity Extractor" as EntityExtractor
+database "Vector Database" as VectorDB
+database "Graph Database" as GraphDB
+participant "Metrics Service" as Metrics
+
+autonumber
+
+API -> DocProcessor: Upload document(s)
+note right
+  Document sources with
+  file content or bytes
+end note
+
+alt Text document
+    DocProcessor -> DocProcessor: Process text content
+else PDF document
+    DocProcessor -> DocProcessor: Extract PDF text and structure
+else Image
+    DocProcessor -> MultiModal: Process image
+    MultiModal -> MultiModal: Generate image description
+    MultiModal --> DocProcessor: Return content
+else Audio/Video
+    DocProcessor -> MultiModal: Process media file
+    MultiModal -> MultiModal: Transcribe content
+    MultiModal --> DocProcessor: Return transcription
+end
+
+DocProcessor -> DocProcessor: Apply preprocessing
+DocProcessor -> DocProcessor: Split into chunks
+note right: Semantic or token-based chunking
+
+loop For each chunk
+    DocProcessor -> EntityExtractor: Extract entities
+    EntityExtractor --> DocProcessor: Return entities and relationships
+    
+    DocProcessor -> VectorDB: Generate embeddings and store
+    DocProcessor -> GraphDB: Store document node
+    
+    loop For each entity
+        DocProcessor -> GraphDB: Store entity node if new
+        DocProcessor -> GraphDB: Create document-entity relationship
+    end
+end
+
+DocProcessor -> Metrics: Record processing metrics
+DocProcessor --> API: Return processing status
+
+@enduml
+
+@startuml Query Processing Flow
+
+!theme plain
+title Query Processing Flow
+
+actor "User" as User
+participant "API Layer" as API
+participant "RAG Service" as RAGService
+participant "Retrieval Pipeline" as RetrievalPipe
+participant "Strategy Factory" as StrategyFactory
+participant "Strategy" as Strategy
+database "Vector Database" as VectorDB
+database "Graph Database" as GraphDB
+participant "LLM" as LLM
+participant "Metrics Service" as Metrics
+participant "Evaluation Service" as Eval
+
+autonumber
+
+User -> API: Submit query
+API -> RAGService: Process query request
+
+RAGService -> StrategyFactory: Create retrieval strategy
+StrategyFactory -> Strategy: Configure strategy
+StrategyFactory --> RAGService: Return strategy
+
+alt Query Transformation
+    RAGService -> LLM: Transform query
+    LLM --> RAGService: Return transformed query
+end
+
+RAGService -> RetrievalPipe: Retrieve context
+
+alt Query Decomposition
+    RetrievalPipe -> LLM: Decompose query
+    LLM --> RetrievalPipe: Return sub-queries
+    
+    loop For each sub-query
+        RetrievalPipe -> VectorDB: Vector search
+        VectorDB --> RetrievalPipe: Return relevant documents
+    end
+else HyDE
+    RetrievalPipe -> LLM: Generate hypothetical document
+    LLM --> RetrievalPipe: Return hypothetical document
+    RetrievalPipe -> VectorDB: Vector search with HyDE embedding
+    VectorDB --> RetrievalPipe: Return relevant documents
+else Hybrid Search
+    par Vector Search
+        RetrievalPipe -> VectorDB: Vector similarity search
+        VectorDB --> RetrievalPipe: Return similar documents
+    and Graph Search
+        RetrievalPipe -> EntityExtractor: Extract entities from query
+        EntityExtractor --> RetrievalPipe: Return entities
+        RetrievalPipe -> GraphDB: Graph traversal with entities
+        GraphDB --> RetrievalPipe: Return related documents
+    end
+end
+
+RetrievalPipe -> RetrievalPipe: Deduplicate results
+
+alt Re-ranking
+    RetrievalPipe -> LLM: Rerank results
+    LLM --> RetrievalPipe: Return reranked results
+end
+
+RetrievalPipe --> RAGService: Return retrieved context
+RAGService -> RAGService: Format context for LLM
+
+RAGService -> LLM: Generate response with context
+LLM --> RAGService: Return generated answer
+
+RAGService -> Metrics: Record query metrics
+
+alt Evaluation Enabled
+    RAGService ->> Eval: Asynchronously evaluate response
+end
+
+RAGService --> API: Return response
+API --> User: Display answer with sources
+
+@enduml
+
+@startuml Evaluation Flow
+
+!theme plain
+title Evaluation Flow
+
+participant "RAG Service" as RAGService
+participant "Evaluation Service" as EvalService
+participant "LLM" as LLM
+participant "Evaluation Repository" as EvalRepo
+database "Database" as DB
+participant "Metrics Service" as Metrics
+
+autonumber
+
+RAGService -> EvalService: Evaluate response
+note right
+  Query, answer, and
+  retrieved context
+end note
+
+loop For each evaluation metric
+    EvalService -> LLM: Evaluate specific metric
+    note right
+        Context relevance, faithfulness,
+        completeness, etc.
+    end note
+    LLM --> EvalService: Return metric score
+end
+
+EvalService -> EvalService: Calculate overall score
+EvalService -> EvalRepo: Store evaluation result
+EvalRepo -> DB: Persist evaluation data
+EvalService -> Metrics: Record evaluation metrics
+
+alt Human Feedback Provided
+    [-> EvalService: Submit user feedback
+    EvalService -> EvalRepo: Update evaluation with feedback
+    EvalRepo -> DB: Update stored evaluation
+    EvalService -> Metrics: Record feedback metrics
+end
+
+@enduml
+
+@startuml Deployment Architecture
+
+!theme plain
+title RAG System Deployment Architecture
+
+node "Kubernetes Cluster" as K8s {
+    frame "Ingress/Load Balancer" as Ingress {
+        component "NGINX Ingress Controller" as Nginx
+        component "Cert Manager" as Cert
+    }
+    
+    frame "RAG Application" as App {
+        cloud "Pod 1" as Pod1 {
+            component "RAG App Container" as App1
+        }
+        cloud "Pod 2" as Pod2 {
+            component "RAG App Container" as App2
+        }
+        cloud "Pod 3" as Pod3 {
+            component "RAG App Container" as App3
+        }
+        component "Horizontal Pod Autoscaler" as HPA
+    }
+    
+    frame "Databases" as DB {
+        database "Neo4j StatefulSet" as Neo4j {
+            component "Neo4j Pod" as Neo4jPod
+            storage "Neo4j PV" as Neo4jPV
+        }
+        
+        database "Weaviate StatefulSet" as Weaviate {
+            component "Weaviate Pod" as WeaviatePod
+            storage "Weaviate PV" as WeaviatePV
+        }
+        
+        database "PostgreSQL StatefulSet" as Postgres {
+            component "PostgreSQL Pod" as PostgresPod
+            storage "PostgreSQL PV" as PostgresPV
+        }
+        
+        database "Redis StatefulSet" as Redis {
+            component "Redis Pod" as RedisPod
+            storage "Redis PV" as RedisPV
+        }
+    }
+    
+    frame "Monitoring Stack" as Monitor {
+        component "Prometheus" as Prometheus
+        component "Grafana" as Grafana
+        component "Loki" as Loki
+        component "Tempo" as Tempo
+        component "OpenTelemetry Collector" as OtelCollector
+    }
+    
+    frame "Shared Storage" as Storage {
+        storage "Document Storage PV" as DocPV
+        storage "Log Storage PV" as LogPV
+    }
+    
+    frame "Config & Secrets" as Config {
+        component "ConfigMaps" as ConfigMaps
+        component "Secrets" as Secrets
+    }
+}
+
+cloud "External Services" as External {
+    component "OpenAI API" as OpenAI
+}
+
+actor "Users" as Users
+
+Users --> Nginx : HTTPS
+Nginx --> App : Route Requests
+App --> OpenAI : API Calls
+App --> Neo4j : Graph Queries
+App --> Weaviate : Vector Queries
+App --> Postgres : Data Storage
+App --> Redis : Caching
+App --> DocPV : Document Storage
+App --> LogPV : Log Storage
+App .up.> ConfigMaps : Read Config
+App .up.> Secrets : Read Secrets
+App ..> OtelCollector : Send Telemetry
+
+HPA ..> App : Scale Pods
+Prometheus ..> App : Scrape Metrics
+Prometheus ..> DB : Scrape Metrics
+OtelCollector --> Prometheus : Export Metrics
+OtelCollector --> Loki : Export Logs
+OtelCollector --> Tempo : Export Traces
+Grafana --> Prometheus : Query Metrics
+Grafana --> Loki : Query Logs
+Grafana --> Tempo : Query Traces
+
+@enduml
