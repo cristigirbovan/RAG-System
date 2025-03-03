@@ -1,4 +1,4 @@
-# RAG System Architecture Document
+# RAG System Architecture
 
 ## Functional Architecture
 ![Functional Architecture](./RAG_System_Functional_Architecture.png)
