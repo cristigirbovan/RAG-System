@@ -667,29 +667,4 @@ ERROR [DocumentProcessor] Error processing document: Out of memory
 ```
 Indicates memory pressure during document processing.
 
-# Appendix E: Security Hardening
 
-## E.1 Security Checklist
-
-- [ ] API keys are properly rotated (min. quarterly)
-- [ ] All database connections use TLS encryption
-- [ ] Sensitive data is encrypted at rest
-- [ ] Kubernetes secrets are properly managed
-- [ ] Network policies restrict pod-to-pod communication
-- [ ] External services accessed via service accounts
-- [ ] Ingress TLS certificates are valid
-- [ ] Application pods run as non-root user
-- [ ] Rate limiting is enabled
-- [ ] Authentication is required for all endpoints
-- [ ] RBAC policies are properly configured
-- [ ] Logging does not contain sensitive information
-- [ ] Vulnerable dependencies are regularly scanned
-- [ ] Container images are regularly updated
-
-## E.2 Security Recommendations
-
-1. **Zero Trust Network**: Implement service mesh (Istio) for mTLS between services
-2. **Secret Management**: Use vault for dynamic credential generation
-3. **Data Classification**: Implement PII detection and redaction
-4. **Audit Logging**: Enable comprehensive audit trails for all admin actions
-5. **Penetration Testing**: Conduct regular security assessments
