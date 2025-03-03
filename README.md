@@ -1,11 +1,5 @@
 # RAG System Architecture
 
-## Functional Architecture
-![Functional Architecture](./RAG_System_Functional_Architecture.png)
-
-## Deployment Architecture
-![Deployment Architecture](./RAG_System_Deployment_Architecture.png)
-
 ## 1. Overview and Goals
 
 ### 1.1 System Purpose
@@ -32,7 +26,12 @@ The Enhanced RAG System follows a microservices-based architecture with the foll
 6. **Monitoring and Observability**: Metrics, logging, and tracing infrastructure
 
 ### 2.2 Architecture Diagram
-See the attached PlantUML diagram for a detailed visual representation of the system architecture.
+
+#### Functional Architecture
+![Functional Architecture](./RAG_System_Functional_Architecture.png)
+
+#### Deployment Architecture
+![Deployment Architecture](./RAG_System_Deployment_Architecture.png)
 
 ## 3. Component Details
 
