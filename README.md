@@ -366,7 +366,8 @@ Minimum recommended resources:
 - Feedback collection improvements
 - Response explanation features
 
-  @startuml Enhanced RAG System Architecture
+```planmtuml
+@startuml Enhanced RAG System Architecture
 
 !define RECTANGLE_COLOR #F8F8F8
 !define SERVICE_COLOR #C5E1A5
@@ -574,3 +575,4 @@ legend right
 endlegend
 
 @enduml
+```
