@@ -373,16 +373,7 @@ Minimum recommended resources:
 - Response explanation features
 # Appendix A: Performance Benchmarks
 
-## A.1 Load Testing Results
-
-The Enhanced RAG System has been tested under various load conditions to ensure it meets performance requirements in production environments. The following benchmarks represent performance under controlled conditions:
-
-| Scenario | Concurrent Users | Avg. Response Time | 95th Percentile | Max Throughput |
-|----------|------------------|-------------------|----------------|---------------|
-| Basic Queries | 50 | 0.8s | 1.5s | 250 req/min |
-| Complex Queries | 50 | 2.3s | 3.7s | 150 req/min |
-| Document Ingestion | 20 | 4.2s/doc | 7.5s/doc | 80 docs/min |
-| Streaming Responses | 100 | 0.2s to first chunk | 0.4s | 300 streams/min |
+## Hardware Configuration
 
 ### Hardware Configuration for Benchmarks
 - **Application Nodes**: 3x (4 CPU cores, 8GB RAM)
