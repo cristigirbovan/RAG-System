@@ -1,13 +1,5 @@
 @startuml Enhanced RAG System Architecture
 
-!define RECTANGLE_COLOR #F8F8F8
-!define SERVICE_COLOR #C5E1A5
-!define DATABASE_COLOR #BBDEFB
-!define CLIENT_COLOR #FFE082
-!define EXTERNAL_COLOR #D1C4E9
-!define CONTAINER_COLOR #DCEDC8
-!define MONITORING_COLOR #FFCCBC
-
 skinparam componentStyle rectangle
 skinparam component {
   BackgroundColor RECTANGLE_COLOR
@@ -33,79 +25,79 @@ skinparam cloud {
 
 ' Top-level components
 package "Client Layer" as ClientLayer {
-  [Web Browser] as WebClient #CLIENT_COLOR
-  [Mobile App] as MobileClient #CLIENT_COLOR
-  [API Client] as ApiClient #CLIENT_COLOR
+  [Web Browser] as WebClient
+  [Mobile App] as MobileClient
+  [API Client] as ApiClient
 }
 
 package "Infrastructure" as Infra {
-  [Load Balancer] as LoadBalancer #RECTANGLE_COLOR
-  [API Gateway] as ApiGateway #RECTANGLE_COLOR
-  
-  rectangle "Kubernetes Cluster" as K8s #CONTAINER_COLOR {
+  [Load Balancer] as LoadBalancer
+  [API Gateway] as ApiGateway
+
+  rectangle "Kubernetes Cluster" as K8s  {
     package "External Services" as ExternalSvcs {
-      [OpenAI API] as OpenAI #EXTERNAL_COLOR
-      [Document Storage] as DocStorage #EXTERNAL_COLOR
+      [OpenAI API] as OpenAI
+      [Document Storage] as DocStorage
     }
-    
+
     package "API Layer" as ApiLayer {
-      [RagApiController] as RagController #SERVICE_COLOR
-      [AdminController] as AdminController #SERVICE_COLOR
-      [UiSupportController] as UIController #SERVICE_COLOR
-      [SecurityFilters] as Security #SERVICE_COLOR
+      [RagApiController] as RagController
+      [AdminController] as AdminController
+      [UiSupportController] as UIController
+      [SecurityFilters] as Security
     }
-    
+
     package "Core RAG Engine" as CoreEngine {
-      [EnhancedRagService] as RagService #SERVICE_COLOR
-      [RetrievalPipeline] as RetrievalPipeline #SERVICE_COLOR
-      [RetrievalStrategyFactory] as StrategyFactory #SERVICE_COLOR
-      
+      [EnhancedRagService] as RagService
+      [RetrievalPipeline] as RetrievalPipeline
+      [RetrievalStrategyFactory] as StrategyFactory
+
       rectangle "Retrieval Strategies" as Strategies {
-        [HybridStrategy] as HybridStrategy #SERVICE_COLOR
-        [HydeStrategy] as HydeStrategy #SERVICE_COLOR
-        [DecompositionStrategy] as DecompositionStrategy #SERVICE_COLOR
-        [AdvancedStrategy] as AdvancedStrategy #SERVICE_COLOR
+        [HybridStrategy] as HybridStrategy
+        [HydeStrategy] as HydeStrategy
+        [DecompositionStrategy] as DecompositionStrategy
+        [AdvancedStrategy] as AdvancedStrategy
       }
     }
-    
+
     package "Document Processing" as DocProcessing {
-      [DocumentProcessor] as DocProcessor #SERVICE_COLOR
-      [MultiModalProcessor] as MultiModalProcessor #SERVICE_COLOR
-      [EntityExtractor] as EntityExtractor #SERVICE_COLOR
+      [DocumentProcessor] as DocProcessor
+      [MultiModalProcessor] as MultiModalProcessor
+      [EntityExtractor] as EntityExtractor
     }
-    
+
     package "Evaluation System" as EvalSystem {
-      [EvaluationService] as EvalService #SERVICE_COLOR
-      [EvaluationRepository] as EvalRepo #SERVICE_COLOR
+      [EvaluationService] as EvalService
+      [EvaluationRepository] as EvalRepo
     }
-    
+
     package "Storage Layer" as StorageLayer {
-      database "Vector DB (Weaviate)" as VectorDB #DATABASE_COLOR {
-        [EnhancedWeaviateVectorStore] as WeaviateStore #SERVICE_COLOR
-        [VectorStoreFactory] as VectorFactory #SERVICE_COLOR
+      database "Vector DB (Weaviate)" as VectorDB  {
+        [EnhancedWeaviateVectorStore] as WeaviateStore
+        [VectorStoreFactory] as VectorFactory
       }
-      
-      database "Graph DB (Neo4j)" as GraphDB #DATABASE_COLOR {
-        [EnhancedNeo4jGraphRepository] as Neo4jRepo #SERVICE_COLOR
+
+      database "Graph DB (Neo4j)" as GraphDB  {
+        [EnhancedNeo4jGraphRepository] as Neo4jRepo
       }
-      
-      database "Relational DB (PostgreSQL)" as RelationalDB #DATABASE_COLOR {
-        [EvaluationStorage] as EvalStorage #DATABASE_COLOR
+
+      database "Relational DB (PostgreSQL)" as RelationalDB {
+        [EvaluationStorage] as EvalStorage
       }
-      
-      database "Cache (Redis)" as CacheDB #DATABASE_COLOR {
-        [QueryCache] as QueryCache #DATABASE_COLOR
-        [EntityCache] as EntityCache #DATABASE_COLOR
+
+      database "Cache (Redis)" as CacheDB  {
+        [QueryCache] as QueryCache
+        [EntityCache] as EntityCache
       }
     }
-    
+
     package "Monitoring and Observability" as MonitoringLayer {
-      [MetricsService] as MetricsService #MONITORING_COLOR
-      [Prometheus] as Prometheus #MONITORING_COLOR
-      [Grafana] as Grafana #MONITORING_COLOR
-      [Loki] as Loki #MONITORING_COLOR
-      [Tempo] as Tempo #MONITORING_COLOR
-      [OpenTelemetry Collector] as OtelCollector #MONITORING_COLOR
+      [MetricsService] as MetricsService
+      [Prometheus] as Prometheus
+      [Grafana] as Grafana
+      [Loki] as Loki
+      [Tempo] as Tempo
+      [OpenTelemetry Collector] as OtelCollector
     }
   }
 }
@@ -195,7 +187,7 @@ EntityExtractor -right-> OpenAI : "Extract Entities"
 
 legend right
   **Enhanced RAG System Architecture**
-  
+
   Color Legend:
   <back:CLIENT_COLOR>Client Components</back>
   <back:SERVICE_COLOR>Service Components</back>
