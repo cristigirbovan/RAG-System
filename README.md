@@ -1,5 +1,11 @@
 # RAG System Architecture Document
-![Alt text for the image](./RAG_System_Deployment_Architecture.png)
+
+## Functional Architecture
+![Functional Architecture](./RAG_System_Functional_Architecture.png)
+
+## Deployment Architecture
+![Deployment Architecture](./RAG_System_Deployment_Architecture.png)
+
 ## 1. Overview and Goals
 
 ### 1.1 System Purpose
