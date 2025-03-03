@@ -1,4 +1,5 @@
 # Enhanced RAG System Architecture Document
+
 ```plantuml
 @startuml Enhanced RAG System Architecture
 
@@ -208,6 +209,7 @@ legend right
 endlegend
 
 @enduml
+```
 
 ## 1. Overview and Goals
 
